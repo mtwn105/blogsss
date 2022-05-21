@@ -20,6 +20,11 @@ const MdEditor = dynamic(() => import("react-markdown-editor-lite"), {
 
 const Home: NextPage = () => {
   const [value, setValue] = useState("");
+  const [title, setTitle] = useState("");
+  const [tags, setTags] = useState("");
+  const [devToApiKey, setDevToApiKey] = useState("");
+  const [hashnodeApiKey, setHashnodeApiKey] = useState("");
+  const [mediumApiKey, setMediumApiKey] = useState("");
   const [devToChecked, setDevToChecked] = useState(true);
   const [hashnodeChecked, setHashnodeChecked] = useState(true);
   const [mediumChecked, setMediumChecked] = useState(true);
@@ -37,7 +42,21 @@ const Home: NextPage = () => {
   };
 
   const handleClick = () => {
-    console.log(value);
+    const platforms = [];
+
+    if (devToChecked) {
+      platforms.push("dev.to");
+    }
+
+    const request = {
+      title: title,
+      tags: tags,
+      content: value,
+      platforms,
+      devToApiKey,
+    };
+
+    console.log(JSON.stringify(request));
   };
 
   const handleEditorChange = (value: any) => {
@@ -72,11 +91,51 @@ const Home: NextPage = () => {
           Get started by writing blog in text editor below
         </Typography>
 
+        <Typography variant="h6" gutterBottom component="div">
+          Title
+        </Typography>
+
+        <Box
+          sx={{
+            width: "100%",
+            margin: "1 rem",
+          }}
+          mb={2}
+        >
+          <TextField
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            fullWidth
+            label="Blog Title"
+            id="title"
+          />
+        </Box>
+
         <MdEditor
           style={{ width: "100%", height: "500px", margin: "1rem" }}
           renderHTML={(text) => <ReactMarkdown children={text} />}
           onChange={handleEditorChange}
         />
+
+        <Typography variant="h6" gutterBottom component="div">
+          Tags
+        </Typography>
+
+        <Box
+          sx={{
+            width: "100%",
+            margin: "1 rem",
+          }}
+          mb={2}
+        >
+          <TextField
+            value={tags}
+            onChange={(event) => setTags(event.target.value)}
+            fullWidth
+            label="Tags (seperated by comma, without spaces)"
+            id="tags"
+          />
+        </Box>
 
         <Typography variant="h6" gutterBottom component="div">
           Publish To
@@ -114,6 +173,10 @@ const Home: NextPage = () => {
           />
         </FormGroup>
 
+        <Typography variant="h6" gutterBottom component="div">
+          API Keys
+        </Typography>
+
         {devToChecked && (
           <Box
             sx={{
@@ -122,7 +185,13 @@ const Home: NextPage = () => {
             }}
             mb={2}
           >
-            <TextField fullWidth label="Dev.To API Key" id="devto" />
+            <TextField
+              value={devToApiKey}
+              onChange={(event) => setDevToApiKey(event.target.value)}
+              fullWidth
+              label="Dev.To API Key"
+              id="devto"
+            />
           </Box>
         )}
 
@@ -134,7 +203,13 @@ const Home: NextPage = () => {
             }}
             mb={2}
           >
-            <TextField fullWidth label="Hashnode API Key" id="devto" />
+            <TextField
+              value={hashnodeApiKey}
+              onChange={(event) => setHashnodeApiKey(event.target.value)}
+              fullWidth
+              label="Hashnode API Key"
+              id="hashnode"
+            />
           </Box>
         )}
 
@@ -146,7 +221,13 @@ const Home: NextPage = () => {
             }}
             mb={2}
           >
-            <TextField fullWidth label="Medium API Key" id="devto" />
+            <TextField
+              value={mediumApiKey}
+              onChange={(event) => setMediumApiKey(event.target.value)}
+              fullWidth
+              label="Medium API Key"
+              id="devto"
+            />
           </Box>
         )}
 
@@ -156,7 +237,9 @@ const Home: NextPage = () => {
           color="success"
           size="large"
           disabled={
-            !value || (!devToChecked && !hashnodeChecked && !mediumChecked)
+            !title ||
+            !value ||
+            (!devToChecked && !hashnodeChecked && !mediumChecked)
           }
         >
           Publish
