@@ -103,6 +103,10 @@ const Home: NextPage = () => {
           mb={2}
         >
           <TextField
+            inputProps={{ style: { fontSize: 40, fontWeight: 800 } }}
+            InputLabelProps={{ style: { fontSize: 25 } }}
+            className={styles.titleField}
+            variant="standard"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             fullWidth

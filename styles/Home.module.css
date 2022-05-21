@@ -43,6 +43,11 @@
   text-decoration: underline;
 }
 
+.titleField {
+  font-size: 4rem;
+  font-weight: 800;
+}
+
 .title {
   margin: 0;
   line-height: 1.15;
