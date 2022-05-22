@@ -1,9 +1,12 @@
 import {
+  Alert,
+  AlertColor,
   Box,
   Button,
   Checkbox,
   FormControlLabel,
   FormGroup,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
@@ -17,6 +20,7 @@ import ReactMarkdown from "react-markdown";
 const MdEditor = dynamic(() => import("react-markdown-editor-lite"), {
   ssr: false,
 });
+import axios from "axios";
 
 const Home: NextPage = () => {
   const [value, setValue] = useState("");
@@ -28,6 +32,26 @@ const Home: NextPage = () => {
   const [devToChecked, setDevToChecked] = useState(true);
   const [hashnodeChecked, setHashnodeChecked] = useState(true);
   const [mediumChecked, setMediumChecked] = useState(true);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState(
+    "Blog Published Successfully to "
+  );
+  const [snackbarType, setSnackbarType] = useState("success");
+
+  const handleSnackbarClick = () => {
+    setSnackbarOpen(true);
+  };
+
+  const handleSnackbarClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setSnackbarOpen(false);
+  };
 
   const handleDevToChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDevToChecked(event.target.checked);
@@ -41,22 +65,36 @@ const Home: NextPage = () => {
     setMediumChecked(event.target.checked);
   };
 
-  const handleClick = () => {
-    const platforms = [];
-
-    if (devToChecked) {
-      platforms.push("dev.to");
-    }
-
+  const publishBlog = async () => {
     const request = {
       title: title,
       tags: tags,
       content: value,
-      platforms,
-      devToApiKey,
     };
 
     console.log(JSON.stringify(request));
+
+    if (devToChecked) {
+      request.devToApiKey = devToApiKey;
+
+      try {
+        const response = await axios.post("/api/publish/devto", request);
+
+        console.log(response.data);
+        setSnackbarMessage(
+          "Blog Published Successfully to Dev.to: " + response.data.url
+        );
+        setSnackbarType("success");
+        setSnackbarOpen(true);
+      } catch (err) {
+        console.log(err);
+        setSnackbarMessage(
+          "Error while publishing to Dev.To: " + err.response.data.message
+        );
+        setSnackbarType("error");
+        setSnackbarOpen(true);
+      }
+    }
   };
 
   const handleEditorChange = (value: any) => {
@@ -89,10 +127,6 @@ const Home: NextPage = () => {
 
         <Typography variant="subtitle1" gutterBottom component="div">
           Get started by writing blog in text editor below
-        </Typography>
-
-        <Typography variant="h6" gutterBottom component="div">
-          Title
         </Typography>
 
         <Box
@@ -147,11 +181,7 @@ const Home: NextPage = () => {
         <FormGroup row={true}>
           <FormControlLabel
             control={
-              <Checkbox
-                checked={devToChecked}
-                onChange={handleDevToChange}
-                defaultChecked
-              />
+              <Checkbox checked={devToChecked} onChange={handleDevToChange} />
             }
             label="Dev.To"
           />
@@ -160,18 +190,13 @@ const Home: NextPage = () => {
               <Checkbox
                 checked={hashnodeChecked}
                 onChange={handleHashnodeChange}
-                defaultChecked
               />
             }
             label="Hashnode"
           />
           <FormControlLabel
             control={
-              <Checkbox
-                checked={mediumChecked}
-                onChange={handleMediumChange}
-                defaultChecked
-              />
+              <Checkbox checked={mediumChecked} onChange={handleMediumChange} />
             }
             label="Medium"
           />
@@ -236,18 +261,36 @@ const Home: NextPage = () => {
         )}
 
         <Button
-          onClick={handleClick}
+          onClick={publishBlog}
           variant="contained"
           color="success"
           size="large"
           disabled={
             !title ||
             !value ||
-            (!devToChecked && !hashnodeChecked && !mediumChecked)
+            (!devToChecked && !hashnodeChecked && !mediumChecked) ||
+            (devToChecked && !devToApiKey) ||
+            (hashnodeChecked && !hashnodeApiKey) ||
+            (mediumChecked && !mediumApiKey)
           }
         >
           Publish
         </Button>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={snackbarType as AlertColor}
+            sx={{ width: "100%" }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </main>
 
       <footer className={styles.footer}>
