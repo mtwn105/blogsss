@@ -37,7 +37,7 @@ const Home: NextPage = () => {
     "Blog Published Successfully to "
   );
   const [snackbarType, setSnackbarType] = useState("success");
-  let [publishResponses, setPublishResponses] = useState([]);
+  let [publishResponses, setPublishResponses] = useState<any>([]);
 
   const handleSnackbarClick = () => {
     setSnackbarOpen(true);
@@ -68,12 +68,15 @@ const Home: NextPage = () => {
 
   const publishBlog = async () => {
     setSnackbarOpen(false);
-    publishResponses = [];
+    setPublishResponses([]);
 
     const request = {
       title: title,
       tags: tags,
       content: value,
+      devToApiKey: null,
+      hashnodeApiKey: null,
+      mediumApiKey: null,
     };
 
     console.log(JSON.stringify(request));
@@ -101,7 +104,7 @@ const Home: NextPage = () => {
         //   message:
         //     "Blog Published Successfully to Dev.to: " + response.data.url,
         // }]);
-      } catch (err) {
+      } catch (err: any) {
         console.log(err);
         // setSnackbarMessage(
         //   "Error while publishing to Dev.To: " + err.response.data.message
@@ -114,6 +117,41 @@ const Home: NextPage = () => {
             type: "error",
             message:
               "Error while publishing to Dev.To: " +
+              (!!err.response.data.message
+                ? err.response.data.message
+                : err.response.data.error),
+          },
+        ]);
+
+        setSnackbarOpen(true);
+      }
+    }
+
+    if (mediumChecked) {
+      request.mediumApiKey = mediumApiKey;
+
+      try {
+        const response = await axios.post("/api/publish/medium", request);
+
+        console.log(response.data);
+        setPublishResponses([
+          ...publishResponses,
+          {
+            type: "success",
+            message:
+              "Blog Successfully Published to Medium: " + response.data.url,
+          },
+        ]);
+        setSnackbarOpen(true);
+      } catch (err: any) {
+        console.log(err);
+
+        setPublishResponses([
+          ...publishResponses,
+          {
+            type: "error",
+            message:
+              "Error while publishing to Medium: " +
               (!!err.response.data.message
                 ? err.response.data.message
                 : err.response.data.error),
@@ -306,35 +344,21 @@ const Home: NextPage = () => {
         </Button>
 
         {snackbarOpen
-          ? publishResponses.map((response, index) => (
+          ? publishResponses.map((response: any, index: any) => (
               <Box
+                key={index}
                 sx={{
                   width: "100%",
                   margin: "1 rem",
                 }}
                 mt={2}
               >
-                <Alert key={index} variant="filled" severity={response.type}>
+                <Alert variant="filled" severity={response.type}>
                   {response.message}
                 </Alert>
               </Box>
             ))
           : null}
-
-        {/* <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={3000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            onClose={handleSnackbarClose}
-            severity={snackbarType as AlertColor}
-            sx={{ width: "100%" }}
-          >
-            {snackbarMessage}
-          </Alert>
-        </Snackbar> */}
       </main>
 
       <footer className={styles.footer}>
