@@ -37,6 +37,7 @@ const Home: NextPage = () => {
     "Blog Published Successfully to "
   );
   const [snackbarType, setSnackbarType] = useState("success");
+  let [publishResponses, setPublishResponses] = useState([]);
 
   const handleSnackbarClick = () => {
     setSnackbarOpen(true);
@@ -66,6 +67,9 @@ const Home: NextPage = () => {
   };
 
   const publishBlog = async () => {
+    setSnackbarOpen(false);
+    publishResponses = [];
+
     const request = {
       title: title,
       tags: tags,
@@ -81,17 +85,41 @@ const Home: NextPage = () => {
         const response = await axios.post("/api/publish/devto", request);
 
         console.log(response.data);
-        setSnackbarMessage(
-          "Blog Published Successfully to Dev.to: " + response.data.url
-        );
-        setSnackbarType("success");
+        setPublishResponses([
+          ...publishResponses,
+          {
+            type: "success",
+            message:
+              "Blog Successfully Published to Dev.To: " + response.data.url,
+          },
+        ]);
+        // setSnackbarType("success");
         setSnackbarOpen(true);
+
+        // setPublishResponses([...publishResponses, {
+        //   type: "success",
+        //   message:
+        //     "Blog Published Successfully to Dev.to: " + response.data.url,
+        // }]);
       } catch (err) {
         console.log(err);
-        setSnackbarMessage(
-          "Error while publishing to Dev.To: " + err.response.data.message
-        );
-        setSnackbarType("error");
+        // setSnackbarMessage(
+        //   "Error while publishing to Dev.To: " + err.response.data.message
+        // );
+        // setSnackbarType("error");
+
+        setPublishResponses([
+          ...publishResponses,
+          {
+            type: "error",
+            message:
+              "Error while publishing to Dev.To: " +
+              (!!err.response.data.message
+                ? err.response.data.message
+                : err.response.data.error),
+          },
+        ]);
+
         setSnackbarOpen(true);
       }
     }
@@ -277,7 +305,23 @@ const Home: NextPage = () => {
           Publish
         </Button>
 
-        <Snackbar
+        {snackbarOpen
+          ? publishResponses.map((response, index) => (
+              <Box
+                sx={{
+                  width: "100%",
+                  margin: "1 rem",
+                }}
+                mt={2}
+              >
+                <Alert key={index} variant="filled" severity={response.type}>
+                  {response.message}
+                </Alert>
+              </Box>
+            ))
+          : null}
+
+        {/* <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}
           onClose={handleSnackbarClose}
@@ -290,7 +334,7 @@ const Home: NextPage = () => {
           >
             {snackbarMessage}
           </Alert>
-        </Snackbar>
+        </Snackbar> */}
       </main>
 
       <footer className={styles.footer}>
