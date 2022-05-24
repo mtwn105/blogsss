@@ -24,10 +24,23 @@ import SwipeableViews from "react-swipeable-views";
 import CreateIcon from "@mui/icons-material/Create";
 import TuneIcon from "@mui/icons-material/Tune";
 import PublishIcon from "@mui/icons-material/Publish";
+import Grid from "@mui/material/Grid";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 const MdEditor = dynamic(() => import("react-markdown-editor-lite"), {
   ssr: false,
 });
+
+type PublishRequest = {
+  title: string;
+  content: string;
+  tags: string;
+  coverImage: string;
+  devToApiKey: string;
+  hashnodeApiKey: string;
+  mediumApiKey: string;
+  series: string;
+};
 
 const Home: NextPage = () => {
   const [value, setValue] = useState("");
@@ -40,12 +53,14 @@ const Home: NextPage = () => {
   const [hashnodeChecked, setHashnodeChecked] = useState(true);
   const [mediumChecked, setMediumChecked] = useState(true);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [apiKeySnackbarOpen, setApiKeySnackbarOpen] = useState(false);
   const [coverImage, setCoverImage] = useState("");
   const [series, setSeries] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [attribution, setAttribution] = useState(true);
   let [publishResponses, setPublishResponses] = useState<any>([]);
   const [tabValue, setTabValue] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -53,21 +68,6 @@ const Home: NextPage = () => {
 
   const handleTabChangeIndex = (index: number) => {
     setTabValue(index);
-  };
-
-  const handleSnackbarClick = () => {
-    setSnackbarOpen(true);
-  };
-
-  const handleSnackbarClose = (
-    event?: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setSnackbarOpen(false);
   };
 
   const handleDevToChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,129 +84,120 @@ const Home: NextPage = () => {
 
   const publishBlog = async () => {
     setSnackbarOpen(false);
+    setLoading(true);
     setPublishResponses([]);
 
-    const request = {
+    saveApiKeys();
+
+    const responses = [];
+
+    const request: PublishRequest = {
       title: title,
       tags: tags,
       content: value,
       coverImage,
       series,
-      devToApiKey: null,
-      hashnodeApiKey: null,
-      mediumApiKey: null,
+      devToApiKey: devToApiKey,
+      hashnodeApiKey: hashnodeApiKey,
+      mediumApiKey: mediumApiKey,
     };
 
     console.log(JSON.stringify(request));
 
     if (devToChecked) {
-      request.devToApiKey = devToApiKey;
-
       try {
         const response = await axios.post("/api/publish/devto", request);
 
         console.log(response.data);
-        setPublishResponses([
-          ...publishResponses,
-          {
-            type: "success",
-            message: "Blog Successfully Published to Dev.To: ",
-            url: response.data.url,
-          },
-        ]);
-        setSnackbarOpen(true);
+        responses.push({
+          type: "success",
+          message: "Blog Successfully Published to Dev.To: ",
+          url: response.data.url,
+        });
       } catch (err: any) {
         console.log(err);
 
-        setPublishResponses([
-          ...publishResponses,
-          {
-            type: "error",
-            message:
-              "Error while publishing to Dev.To: " +
-              (!!err.response.data.message
-                ? err.response.data.message
-                : err.response.data.error),
-          },
-        ]);
-
-        setSnackbarOpen(true);
+        responses.push({
+          type: "error",
+          message:
+            "Error while publishing to Dev.To: " +
+            (!!err.response.data.message
+              ? err.response.data.message
+              : err.response.data.error),
+        });
       }
     }
 
     if (hashnodeChecked) {
-      request.hashnodeApiKey = hashnodeApiKey;
-
       try {
         const response = await axios.post("/api/publish/hashnode", request);
 
         console.log(response.data);
-        setPublishResponses([
-          ...publishResponses,
-          {
-            type: "success",
-            message: "Blog Successfully Published to Hashnode: ",
-            url: response.data.url,
-          },
-        ]);
-        setSnackbarOpen(true);
+        responses.push({
+          type: "success",
+          message: "Blog Successfully Published to Hashnode: ",
+          url: response.data.url,
+        });
       } catch (err: any) {
         console.log(err);
 
-        setPublishResponses([
-          ...publishResponses,
-          {
-            type: "error",
-            message:
-              "Error while publishing to Hashnode: " +
-              (!!err.response.data.message
-                ? err.response.data.message
-                : err.response.data.error),
-          },
-        ]);
-
-        setSnackbarOpen(true);
+        responses.push({
+          type: "error",
+          message:
+            "Error while publishing to Hashnode: " +
+            (!!err.response.data.message
+              ? err.response.data.message
+              : err.response.data.error),
+        });
       }
     }
 
     if (mediumChecked) {
-      request.mediumApiKey = mediumApiKey;
-
       try {
         const response = await axios.post("/api/publish/medium", request);
 
         console.log(response.data);
-        setPublishResponses([
-          ...publishResponses,
-          {
-            type: "success",
-            message: "Blog Successfully Published to Medium: ",
-            url: response.data.url,
-          },
-        ]);
-        setSnackbarOpen(true);
+        responses.push({
+          type: "success",
+          message: "Blog Successfully Published to Medium: ",
+          url: response.data.url,
+        });
       } catch (err: any) {
         console.log(err);
 
-        setPublishResponses([
-          ...publishResponses,
-          {
-            type: "error",
-            message:
-              "Error while publishing to Medium: " +
-              (!!err.response.data.message
-                ? err.response.data.message
-                : err.response.data.error),
-          },
-        ]);
-
-        setSnackbarOpen(true);
+        responses.push({
+          type: "error",
+          message:
+            "Error while publishing to Medium: " +
+            (!!err.response.data.message
+              ? err.response.data.message
+              : err.response.data.error),
+        });
       }
     }
+
+    setPublishResponses(responses);
+    setSnackbarOpen(true);
+    setLoading(false);
   };
 
   const handleEditorChange = (value: any) => {
     setValue(value.text);
+  };
+
+  const saveApiKeys = () => {
+    // Save keys to local storage
+    localStorage.setItem("devToApiKey", devToApiKey);
+    localStorage.setItem("hashnodeApiKey", hashnodeApiKey);
+    localStorage.setItem("mediumApiKey", mediumApiKey);
+
+    setApiKeySnackbarOpen(true);
+  };
+
+  const clearApiKeys = () => {
+    // Save keys to local storage
+    localStorage.clear();
+    setApiKeySnackbarOpen(true);
   };
 
   return (
@@ -322,8 +313,8 @@ const Home: NextPage = () => {
               mb={3}
             >
               <Alert variant="outlined" severity="info">
-                Cover Image will not be added for Medium. You'll have to add
-                them manually.
+                Cover Image will not be added for Medium. You&apos;ll have to
+                add it manually.
               </Alert>
             </Box>
 
@@ -387,11 +378,21 @@ const Home: NextPage = () => {
                 margin: "1 rem",
               }}
               mt={2}
+              mb={1}
+            >
+              <Alert variant="outlined" severity="info">
+                Tags will not be added for Hashnode. You&apos;ll have to add
+                them manually.
+              </Alert>
+            </Box>
+            <Box
+              sx={{
+                width: "100%",
+              }}
               mb={3}
             >
               <Alert variant="outlined" severity="info">
-                Tags will not be added for Hashnode. You'll have to add them
-                manually.
+                Tags are mandatory for Dev.To
               </Alert>
             </Box>
 
@@ -524,8 +525,8 @@ const Home: NextPage = () => {
               mb={3}
             >
               <Alert variant="outlined" severity="info">
-                API Keys are not stored. If you don't have one, you can get from
-                the respective platform
+                API Keys are saved on the client. If you don&apos;t have one,
+                you can get from the respective platform
               </Alert>
             </Box>
 
@@ -583,22 +584,40 @@ const Home: NextPage = () => {
               </Box>
             )}
 
-            <Button
-              onClick={publishBlog}
-              variant="contained"
-              color="success"
-              size="large"
-              disabled={
-                !title ||
-                !value ||
-                (!devToChecked && !hashnodeChecked && !mediumChecked) ||
-                (devToChecked && !devToApiKey) ||
-                (hashnodeChecked && !hashnodeApiKey) ||
-                (mediumChecked && !mediumApiKey)
-              }
-            >
-              Publish
-            </Button>
+            <Grid container spacing={1}>
+              <Grid item>
+                <Button
+                  onClick={clearApiKeys}
+                  variant="outlined"
+                  color="error"
+                  size="large"
+                >
+                  Clear API Keys
+                </Button>
+              </Grid>
+              <Grid item>
+                <LoadingButton
+                  startIcon={<PublishIcon />}
+                  onClick={publishBlog}
+                  variant="contained"
+                  color="success"
+                  size="large"
+                  loading={loading}
+                  disabled={
+                    !title ||
+                    title.trim().length === 0 ||
+                    !value ||
+                    value.trim().length === 0 ||
+                    (!devToChecked && !hashnodeChecked && !mediumChecked) ||
+                    (devToChecked && !devToApiKey) ||
+                    (hashnodeChecked && !hashnodeApiKey) ||
+                    (mediumChecked && !mediumApiKey)
+                  }
+                >
+                  Publish
+                </LoadingButton>
+              </Grid>
+            </Grid>
 
             {snackbarOpen
               ? publishResponses.map((response: any, index: any) => (
@@ -612,13 +631,19 @@ const Home: NextPage = () => {
                   >
                     <Alert variant="filled" severity={response.type}>
                       {response.message}{" "}
-                      <a target="_blank" href={response.url}>
+                      <a target="_blank" rel="noreferrer" href={response.url}>
                         {response.url}
                       </a>
                     </Alert>
                   </Box>
                 ))
               : null}
+
+            <Snackbar open={apiKeySnackbarOpen} autoHideDuration={2000}>
+              <Alert severity="success" variant="filled" sx={{ width: "100%" }}>
+                API Keys are saved in the browser
+              </Alert>
+            </Snackbar>
           </div>
         </SwipeableViews>
       </main>
