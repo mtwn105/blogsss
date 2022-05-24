@@ -34,6 +34,7 @@ const MdEditor = dynamic(() => import("react-markdown-editor-lite"), {
 type PublishRequest = {
   title: string;
   content: string;
+  subtitle: string;
   tags: string;
   coverImage: string;
   devToApiKey: string;
@@ -95,6 +96,7 @@ const Home: NextPage = () => {
       title: title,
       tags: tags,
       content: value,
+      subtitle: subtitle,
       coverImage,
       series,
       devToApiKey: devToApiKey,
@@ -103,6 +105,12 @@ const Home: NextPage = () => {
     };
 
     console.log(JSON.stringify(request));
+
+    if (attribution) {
+      request.content = request.content.concat(
+        "\n\n***Blog published using [blogsss.amitwani.dev](https://blogsss.amitwani.dev)***\n\n"
+      );
+    }
 
     if (devToChecked) {
       try {
