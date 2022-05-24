@@ -40,10 +40,10 @@ const Home: NextPage = () => {
   const [hashnodeChecked, setHashnodeChecked] = useState(true);
   const [mediumChecked, setMediumChecked] = useState(true);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState(
-    "Blog Published Successfully to "
-  );
-  const [snackbarType, setSnackbarType] = useState("success");
+  const [coverImage, setCoverImage] = useState("");
+  const [series, setSeries] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [attribution, setAttribution] = useState(true);
   let [publishResponses, setPublishResponses] = useState<any>([]);
   const [tabValue, setTabValue] = useState(0);
 
@@ -90,6 +90,8 @@ const Home: NextPage = () => {
       title: title,
       tags: tags,
       content: value,
+      coverImage,
+      series,
       devToApiKey: null,
       hashnodeApiKey: null,
       mediumApiKey: null,
@@ -308,6 +310,74 @@ const Home: NextPage = () => {
             aria-labelledby={`full-width-tab-1`}
           >
             <Typography variant="h6" gutterBottom component="div">
+              Cover Image
+            </Typography>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mt={2}
+              mb={3}
+            >
+              <Alert variant="outlined" severity="info">
+                Cover Image will not be added for Medium. You'll have to add
+                them manually.
+              </Alert>
+            </Box>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mb={2}
+            >
+              <TextField
+                value={coverImage}
+                onChange={(event) => setCoverImage(event.target.value)}
+                fullWidth
+                label="Cover Image URL"
+                id="coverImage"
+                type={"url"}
+              />
+            </Box>
+
+            <Typography variant="h6" gutterBottom component="div">
+              Subtitle
+            </Typography>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mt={2}
+              mb={3}
+            >
+              <Alert variant="outlined" severity="info">
+                Subtitle will only be used in Hashnode
+              </Alert>
+            </Box>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mb={2}
+            >
+              <TextField
+                value={subtitle}
+                onChange={(event) => setSubtitle(event.target.value)}
+                fullWidth
+                label="Subtitle"
+                id="subtitle"
+              />
+            </Box>
+
+            <Typography variant="h6" gutterBottom component="div">
               Tags
             </Typography>
 
@@ -339,6 +409,67 @@ const Home: NextPage = () => {
                 label="Tags (seperated by comma, without spaces)"
                 id="tags"
               />
+            </Box>
+
+            <Typography variant="h6" gutterBottom component="div">
+              Series
+            </Typography>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mt={2}
+              mb={3}
+            >
+              <Alert variant="outlined" severity="info">
+                Series will only be used in Dev.To
+              </Alert>
+            </Box>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mb={2}
+            >
+              <TextField
+                value={series}
+                onChange={(event) => setSeries(event.target.value)}
+                fullWidth
+                label="Series"
+                id="series"
+              />
+            </Box>
+
+            <Typography variant="h6" gutterBottom component="div">
+              Attribution
+            </Typography>
+            <FormGroup row={true}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={attribution}
+                    onChange={(event) => setAttribution(event.target.checked)}
+                  />
+                }
+                label="Add Attribution to Blogsss at the end"
+              />
+            </FormGroup>
+
+            <Box
+              sx={{
+                width: "100%",
+                margin: "1 rem",
+              }}
+              mt={2}
+              mb={3}
+            >
+              <Alert variant="outlined" severity="info">
+                Adds a link to Blogsss at the end of the blog.
+              </Alert>
             </Box>
           </div>
           <div
