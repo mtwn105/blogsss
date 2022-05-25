@@ -194,9 +194,21 @@ const Home: NextPage = () => {
   };
 
   useEffect(() => {
-    setDevToApiKey(localStorage.getItem("devToApiKey") as string);
-    setHashnodeApiKey(localStorage.getItem("hashnodeApiKey") as string);
-    setMediumApiKey(localStorage.getItem("mediumApiKey") as string);
+    setDevToApiKey(
+      !!localStorage.getItem("devToApiKey")
+        ? (localStorage.getItem("devToApiKey") as string)
+        : ""
+    );
+    setHashnodeApiKey(
+      !!localStorage.getItem("hashnodeApiKey")
+        ? (localStorage.getItem("hashnodeApiKey") as string)
+        : ""
+    );
+    setMediumApiKey(
+      !!localStorage.getItem("mediumApiKey")
+        ? (localStorage.getItem("mediumApiKey") as string)
+        : ""
+    );
   }, []);
 
   const saveApiKeys = () => {
