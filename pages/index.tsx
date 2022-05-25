@@ -15,7 +15,7 @@ import {
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import "react-markdown-editor-lite/lib/index.css";
 import ReactMarkdown from "react-markdown";
@@ -193,6 +193,12 @@ const Home: NextPage = () => {
     setValue(value.text);
   };
 
+  useEffect(() => {
+    setDevToApiKey(localStorage.getItem("devToApiKey") as string);
+    setHashnodeApiKey(localStorage.getItem("hashnodeApiKey") as string);
+    setMediumApiKey(localStorage.getItem("mediumApiKey") as string);
+  }, []);
+
   const saveApiKeys = () => {
     // Save keys to local storage
     localStorage.setItem("devToApiKey", devToApiKey);
@@ -203,8 +209,13 @@ const Home: NextPage = () => {
   };
 
   const clearApiKeys = () => {
-    // Save keys to local storage
+    // Clear local storage
     localStorage.clear();
+
+    setDevToApiKey("");
+    setHashnodeApiKey("");
+    setMediumApiKey("");
+
     setApiKeySnackbarOpen(true);
   };
 
