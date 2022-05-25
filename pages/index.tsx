@@ -309,7 +309,7 @@ const Home: NextPage = () => {
 
             <MdEditor
               style={{ width: "100%", height: "500px" }}
-              renderHTML={(text) => <ReactMarkdown children={text} />}
+              renderHTML={(text) => <ReactMarkdown>{text}</ReactMarkdown>}
               onChange={handleEditorChange}
             />
           </div>
